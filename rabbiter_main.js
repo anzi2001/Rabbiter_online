@@ -20,16 +20,13 @@ app.use(bodyParser.json({
     strict: false
 }));
 app.use(bodyParser.urlencoded({extended: true}));
-
-const dbName = "/rabbiter_online";
-var env = process.env;
 var mongoURL;
 if (mongoURL == null && process.env.DATABASE_SERVICE_NAME) {
     var mongoServiceName = process.env.DATABASE_SERVICE_NAME.toUpperCase(),
         mongoHost = process.env[mongoServiceName + '_SERVICE_HOST'],
         mongoPort = process.env[mongoServiceName + '_SERVICE_PORT'],
         mongoDatabase = process.env[mongoServiceName + '_DATABASE'],
-        mongoPassword = process.env[mongoServiceName + '_PASSWORD']
+        mongoPassword = process.env[mongoServiceName + '_PASSWORD'],
         mongoUser = process.env[mongoServiceName + '_USER'];
   
     if (mongoHost && mongoPort && mongoDatabase) {
@@ -43,7 +40,7 @@ if (mongoURL == null && process.env.DATABASE_SERVICE_NAME) {
   
   }
 }
-  
+console.log(mongoURL);
 var mongoDBCon = mongodb.connect(mongoURL,{useNewUrlParser: true},function(err,db){
     if(err) throw err;
     dbo = db.db("rabbiter_online");
