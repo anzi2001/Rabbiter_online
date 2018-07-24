@@ -22,7 +22,7 @@ app.use(bodyParser.json({
 app.use(bodyParser.urlencoded({extended: true}));
 
 
-var mongoDBCon = mongodb.connect("mongodb://localhost:27017/rabbiter_online",{useNewUrlParser: true},function(err,db){
+var mongoDBCon = mongodb.connect(process.env.OPENSHIFT_MONGODB_DB_URL,{useNewUrlParser: true},function(err,db){
     if(err) throw err;
     dbo = db.db("rabbiter_online");
 });
@@ -68,7 +68,7 @@ app.post("/updateEvents",function(req,res){
         if(err) throw err;
         console.log(result);
         res.send("FINISHED");
-    })
+    });
 });
 app.post("/createNewEntry",upload.single("entryImage"),function(req,res){
     var jsonparsed = JSON.parse(req.body.postEntry);
@@ -106,7 +106,7 @@ app.get("/seekChildMergedEntries",function(reqmain,resmain){
         if(err) throw err;
         console.log(result);
         resmain.status(200).json(result);
-    })
+    });
 });
 app.post("/searchForImage",function(req,res){
     if(req.body != ""){
@@ -187,7 +187,7 @@ app.post("/seekAlertUUID",function(req,res){
     dbo.collection("events").findOne({eventUUID: req.body},function(err,result){
         if(err) throw err;
         res.status(200).json(result);
-    })
+    });
 });
 app.post("/moveOnlineEntry",upload.single("entryImage"),function(req,res){
     var entryJson = JSON.parse(req.body.entry);
