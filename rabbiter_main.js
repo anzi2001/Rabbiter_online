@@ -21,64 +21,54 @@ app.use(bodyParser.json({
 }));
 app.use(bodyParser.urlencoded({extended: true}));
 
-var connection = mysql.createConnection({
-    host:"localhost",
-    user: "root",
-    password : "",
-    database: "rabbiter_online"
-});
 
 var mongoDBCon = mongodb.connect("mongodb://localhost:27017/rabbiter_online",{useNewUrlParser: true},function(err,db){
     if(err) throw err;
     dbo = db.db("rabbiter_online");
-});
-connection.connect(function(err){
-    if(err) throw err;
-    console.log("DB WORKS");
 });
 app.get("/",function(req,res){
     res.send("greetings stranger");
 });
 
 app.get("/allEntries",function(req,res){
-    connection.query("SELECT * FROM entries",function(err,result,fields){
+    dbo.collection("entries").find({}).toArray(function(err,result){
         if(err) throw err;
-        console.log("allEntries request has been sent and served");
+        console.log(result);
         res.status(200).json(result);
     });
-    
 });
 app.post("/seekPastEvents",function(req,res){
-    connection.query("SELECT * FROM events WHERE name = ? AND  NOT notificationState = 0",req.body,function(err,result,fields){
+    dbo.collection("events").find({name: req.body, notificationState: 0}).toArray(function(err,result){
         if(err) throw err;
-        res.status(200).json(result);
+        console.log(result);
+        res.status.json(result);
     });
 });
 app.post("/seekSingleEntry",function(req,res){
-    connection.query("SELECT * FROM entries WHERE entryID = ?",req.body,function(err,result,fields){
+    dbo.collection("entries").findOne({entryID: req.body},function(err,result){
         if(err) throw err;
         console.log(result);
         res.status(200).json(result);
     });
 });
 app.post("/updateEntry",function(req,res){
-    connection.query("UPDATE entries SET mergedEntryName = ? WHERE mergedEntry = ?",[req.body.mergedEntryName,req.body.entryID],function(err,result,fields){
+    dbo.collection("entries").updateOne({mergedEntry: req.body.entryID},{$set: {mergedEntryName: req.body.mergedEntryName}},function(err,result){
         if(err) throw err;
         console.log(result);
         res.send("DONE");
     });
-    connection.query("UPDATE entries SET ? WHERE entryID = "+req.body.entryID, req.body, function(err,result,fields){
-        if(err) throw err;
-        console.log("UPDATE RESULT "+ result);
-        res.send("FINISHED");
-    });
-});
-app.post("/updateEvents",function(req,res){
-    connection.query("UPDATE events SET ? WHERE eventUUID = ?",[req.body,req.body.eventUUID],function(err,result,fields){
+    dbo.collection("entries").updateOne({entryID: req.body.entryID},req.body,function(err,result){
         if(err) throw err;
         console.log(result);
         res.send("FINISHED");
     });
+});
+app.post("/updateEvents",function(req,res){
+    dbo.collection("events").updateOne({eventUUID: req.body.eventUUID},req.body,function(err,result){
+        if(err) throw err;
+        console.log(result);
+        res.send("FINISHED");
+    })
 });
 app.post("/createNewEntry",upload.single("entryImage"),function(req,res){
     var jsonparsed = JSON.parse(req.body.postEntry);
@@ -86,26 +76,37 @@ app.post("/createNewEntry",upload.single("entryImage"),function(req,res){
     if(req.file != null){
         jsonparsed.entryPhLoc = req.file.originalname;
     }
-    connection.query("INSERT INTO entries SET ?",jsonparsed,function(err,result,fields){
+    dbo.collection("entries").insertOne(jsonparsed,function(err,result){
         if(err) throw err;
         console.log(result);
         res.send("FINISHED");
     });
 });
-    app.post("/seekParentOf",function(req,res){
-    connection.query("SELECT * FROM entries WHERE (chooseGender = \"Male\" AND matedWithOrParents = ?) OR (secondParent = ? AND chooseGender = \"Female\")",[req.body.parent,req.body.parent],function(err,result,fields){
-        if(err) throw err;
-        res.json(result);
-    } );
+app.post("/seekParentOf",function(req,res){
+    dbo.collection("entries").find({
+        $or:[
+            {$and:[
+                {chooseGender:"Male"},
+                {matedWithOrParents: req.body.parent},
+            ]},
+            {$and:[
+                {secondParent: req.body.parent},
+                {chooseGender:"Female"},
+            ]}
+        ]
+        },function(err,result){
+            if(err) throw err;
+            console.log(result);
+            res.json(result);
+        });
 });
 
 app.get("/seekChildMergedEntries",function(reqmain,resmain){
-    connection.query("SELECT * FROM entries WHERE isChildMerged = 0",function(err,result,fields){
+    dbo.collection("entries").find({isChildMerged: false}).toArray(function(err,result){
         if(err) throw err;
-        console.log("seekChildMergedEntries: ");
         console.log(result);
         resmain.status(200).json(result);
-    });
+    })
 });
 app.post("/searchForImage",function(req,res){
     if(req.body != ""){
@@ -118,107 +119,121 @@ app.post("/searchForImage",function(req,res){
            });  
     }
     else{
-        res.send("FECK");
+        res.send("FUCK");
     }
 });
 app.post("/createNewEvent",function(req,res){
-    connection.query("INSERT INTO events SET ?",req.body,function(err,result,fields){
+    dbo.collection("events").insertOne(req.body,function(err,result){
         if(err) throw err;
         console.log(result);
     });
 });
 app.post("/getAddBirthReq",function(req,res){
-    connection.query("SELECT * FROM events WHERE eventUUID = ?",req.body,function(err,result,fields){
+    dbo.collection("events").findOne({eventUUID: req.body},function(err,result){
         if(err) throw err;
         console.log(result);
         res.status(200).json(result);
     });
 });
 app.post("/seekEventsName",function(req,res){
-    connection.query("SELECT * FROM events WHERE name = ?",req.body,function(err,result,fields){
+    dbo.collection("events").find({name: req.body}).toArray(function(err,result){
         if(err) throw err;
         console.log(result);
         res.status(200).json(result);
     });
 });
 app.post("/deleteEntry",function(req,res){
-    connection.query("DELETE FROM entries WHERE entryID = ?",req.body,function(err,result,fields){
+    dbo.collection("entries").deleteOne({entryID: req.body},function(err,result){
         if(err) throw err;
         console.log(result);
     });
 });
 app.post("/deleteEvent",function(req,res){
-    connection.query("DELETE FROM events WHERE eventUUID = ?",req.body,function(err,result,fields){
+    dbo.collection(events).deleteOne({eventUUID:req.body},function(err,result){
         if(err) throw err;
         console.log(result);
     });
 });
 app.post("/seekEventsByNameType",function(req,res){
-    connection.query("SELECT * FROM events WHERE name = ? AND typeOfEvent = 0 OR secondParent = ? AND typeOfEvent = 0 ORDERBY dateOfEvent ASC",[req.body,req.body],function(err,result,fields){
+    dbo.collection("events").find(
+    {
+        $or:[
+            {$and:
+                [
+                    {name: req.body},
+                    {typeOfEvent:0}
+                ]
+            },
+            {$and:
+                [
+                    {secondParent: req.body},
+                    {typeOfEvent:0}
+                ]   
+            }
+        ]
+    }).sort({dateOfEvent: 1}).toArray(function(err,result){
         if(err) throw err;
         console.log(result);
         res.status(200).json(result);
     });
 });
 app.get("/seekEventsNotAlerted",function(req,res){
-    connection.query("SELECT * FROM events WHERE notificationState = 0 ORDER BY dateOfEventMilis ASC",function(err,result,fields){
+    dbo.collection("events").find({notificationState: 0}).sort({dateOfEvent:1}).toArray(function(err,result){
         if(err) throw err;
         res.json(result);
     });
 });
 app.post("/seekAlertUUID",function(req,res){
-    connection.query("SELECT * FROM events WHERE entryUUID = ?",req.body,function(err,result,fields){
+    dbo.collection("events").findOne({eventUUID: req.body},function(err,result){
         if(err) throw err;
         res.status(200).json(result);
-    });
+    })
 });
 app.post("/moveOnlineEntry",upload.single("entryImage"),function(req,res){
     var entryJson = JSON.parse(req.body.entry);
     entryJson.entryPhLoc = req.file.originalname;
     console.log(entryJson);
-    connection.query("INSERT INTO entries SET ?",entryJson,function(err,result,fields){
+    dbo.collection("entries").insertOne(entryJson,function(err,result){
         if(err) throw err;
-        console.log("shit works");
         console.log(result);
     });
 });
 app.post("/moveOnlineEntryNoFile",function(req,res){
-    connection.query("INSERT INTO entries SET ?",req.body,function(err,result,fields){
+    dbo.collection("entries").insertOne(req.body,function(err,result){
         if(err) throw err;
         console.log(result);
     });
 });
 app.post("/moveOnlineEvent",function(req,res){
-    connection.query("INSERT INTO events SET ?",req.body,function(err,result,fields){
+    dbo.collection("events").insertOne(req.body,function(err,result){
         if(err) throw err;
         console.log("event inserted");
         console.log(result);
     });
 });
 app.get("/migrateToMilis",function(req,res){
-    connection.query("SELECT * FROM events",function(err,result,fields){
+    dbo.collection(events).find({}).toArray(function(err,result){
         if(err) throw err;
-        /*for(var i = 0;i<result.length;i++){
-        }*/
         result.array.forEach(element => {
             var date = new Date(element.dateOfEvent);
             console.log(date.getTime());
-            connection.query("UPDATE events SET dateOfEventMilis  = ? WHERE eventUUID = ?",[date.getTime(),element.eventUUID] ,function(errw,resultw,fieldsw){
-                if(errw) throw errw;
-                console.log(resultw);
-            }); 
+            dbo.collection("events").updateOne({eventUUID:element.eventUUID},{dateOfEventMilis: date.getTime()},function(err,result){
+                if(err) throw err;
+                console.log(result);
+            });
         });
     });
     res.send("OK");
 });
 app.post("/NotifBroadcast",(req,res)=>{
-    connection.query("SELECT * FROM events WHERE eventUUID = ? AND notificationState = 0",req.body,(err,result,fields)=>{
+    dbo.collection("events").findOne({$and:[{eventUUID: req.body},{notificationState:0}]},(err,result)=>{
         if(err) throw err;
         console.log(result);
+        res.status(200).json(result);
     });
 });
 app.post("/findNotAlertedEvent",(req,res)=>{
-    connection.query("SELECT * FROM events WHERE eventUUID = ? AND notificationState = 0",req.body,(err,result,fields)=>{
+    dbo.collection("events").findOne({$and:[{eventUUID: req.body},{notificationState: 0}]},(err,result)=>{
         if(err) throw err;
         console.log(result);
     });
