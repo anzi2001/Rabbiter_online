@@ -24,7 +24,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 const dbName = "/rabbiter_online";
 var env = process.env;
 var databaseUrl = process.env.OPENSHIFT_MONGODB_DB_USERNAME + ":" +  process.env.OPENSHIFT_MONGODB_DB_PASSWORD + "@" + process.env.OPENSHIFT_MONGODB_DB_HOST + ":" +  process.env.OPENSHIFT_MONGODB_DB_PORT+ dbName;
-console.log(databaseUrl);
+console.log(env.MONGODB_USER);
 var mongoDBCon = mongodb.connect("mongodb://172.30.148.2:27017/rabbiter_online",{useNewUrlParser: true},function(err,db){
     if(err) throw err;
     dbo = db.db("rabbiter_online");
