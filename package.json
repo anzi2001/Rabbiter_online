@@ -17,7 +17,7 @@
   "devDependencies": {},
   "scripts": {
     "test": "node rabbiter_main.js",
-    "start":"node rabbiter_main.js"
+    "start": "node rabbiter_main.js"
   },
   "repository": {
     "type": "git",
