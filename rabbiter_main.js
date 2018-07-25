@@ -40,6 +40,7 @@ if (mongoURL == null && process.env.DATABASE_SERVICE_NAME) {
   }
 }
 console.log(mongoURL);
+console.log("the new directory");
 var mongoDBCon = mongodb.connect(mongoURL,{useNewUrlParser: true},function(err,db){
     if(err) throw err;
     dbo = db.db("rabbiter_online");
