@@ -25,7 +25,7 @@ if (mongoURL == null && process.env.DATABASE_SERVICE_NAME) {
         mongoHost = process.env[mongoServiceName + '_SERVICE_HOST'],
         mongoPort = process.env[mongoServiceName + '_SERVICE_PORT'],
         mongoDatabase = process.env.MONGODB_DATABASE,
-        mongoPassword = process.env.MONGODB_ADMIN_PASSWORD,
+        mongoPassword = process.env.MONGODB_PASSWORD,
         mongoUser = process.env.MONGODB_USER;
 
     if (mongoHost && mongoPort && mongoDatabase) {
