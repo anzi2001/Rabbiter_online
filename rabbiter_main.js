@@ -1,13 +1,12 @@
 const express = require("express");
 const app = express();
-const mysql= require("mysql");
 const mongodb = require("mongodb").MongoClient;
 const bodyParser= require("body-parser");
 const mul = require("multer");
 const sharp = require("sharp"); 
 const storage = mul.diskStorage({
     destination: function(req,file,cb){
-        cb(null,__dirname);
+        cb(null,"/photos/");
     },
     filename: function(req,file,cb){
         cb(null,file.originalname);
@@ -27,11 +26,8 @@ if (mongoURL == null && process.env.DATABASE_SERVICE_NAME) {
         mongoPort = process.env[mongoServiceName + '_SERVICE_PORT'],
         mongoDatabase = process.env.MONGODB_DATABASE,
         mongoPassword = process.env.MONGODB_ADMIN_PASSWORD,
-        dataDir = process.env.OPENSHIFT_DATA_DIR,
         mongoUser = process.env.MONGODB_USER;
 
-    console.log(dataDir);
-    console.log(process.env.OPENSHIFT_DATA_DIR);
     if (mongoHost && mongoPort && mongoDatabase) {
       mongoURLLabel = mongoURL = 'mongodb://';
       if (mongoUser && mongoPassword) {
