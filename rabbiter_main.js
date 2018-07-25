@@ -27,7 +27,7 @@ if (mongoURL == null && process.env.DATABASE_SERVICE_NAME) {
         mongoPort = process.env[mongoServiceName + '_SERVICE_PORT'],
         mongoDatabase = process.env.MONGODB_DATABASE,
         mongoPassword = process.env.MONGODB_ADMIN_PASSWORD,
-        dataDir = proces.env.OPENSHIFT_DATA_DIR,
+        dataDir = process.env.OPENSHIFT_DATA_DIR,
         mongoUser = process.env.MONGODB_USER;
 
     console.log(dataDir);
