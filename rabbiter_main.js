@@ -129,7 +129,7 @@ app.get("/seekChildMergedEntries",function(reqmain,resmain){
 });
 app.post("/searchForImage",function(req,res){
     if(req.body != ""){
-        sharp("/photos"+req.body)
+        sharp("/photos/"+req.body)
            .resize(256,256)
            .toBuffer(function(err,buffer,info){
                if(err) throw err;
