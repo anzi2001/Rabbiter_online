@@ -26,9 +26,12 @@ if (mongoURL == null && process.env.DATABASE_SERVICE_NAME) {
         mongoHost = process.env[mongoServiceName + '_SERVICE_HOST'],
         mongoPort = process.env[mongoServiceName + '_SERVICE_PORT'],
         mongoDatabase = process.env.MONGODB_DATABASE,
-        mongoPassword = process.env.MONGODB_PASSWORD,
+        mongoPassword = process.env.MONGODB_ADMIN_PASSWORD,
+        dataDir = proces.env.OPENSHIFT_DATA_DIR,
         mongoUser = process.env.MONGODB_USER;
-  
+
+    console.log(dataDir);
+    console.log(process.env.OPENSHIFT_DATA_DIR);
     if (mongoHost && mongoPort && mongoDatabase) {
       mongoURLLabel = mongoURL = 'mongodb://';
       if (mongoUser && mongoPassword) {
@@ -130,7 +133,7 @@ app.get("/seekChildMergedEntries",function(reqmain,resmain){
 app.post("/searchForImage",function(req,res){
     if(req.body != ""){
         sharp(req.body)
-           .resize( 256,256)
+           .resize(256,256)
            .toBuffer(function(err,buffer,info){
                if(err) throw err;
                console.log(info);
