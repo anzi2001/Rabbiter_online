@@ -60,7 +60,7 @@ app.post("/seekPastEvents",function(req,res){
     dbo.collection("events").find({name: req.body, notificationState: 0}).toArray(function(err,result){
         if(err) throw err;
         console.log(result);
-        res.status.json(result);
+        res.status(200).json(result);
     });
 });
 app.post("/seekSingleEntry",function(req,res){
@@ -129,7 +129,7 @@ app.get("/seekChildMergedEntries",function(reqmain,resmain){
 });
 app.post("/searchForImage",function(req,res){
     if(req.body != ""){
-        sharp("/photos/"+req.body)
+        sharp("/photos/ "+req.body)
            .resize(256,256)
            .toBuffer(function(err,buffer,info){
                if(err) throw err;
