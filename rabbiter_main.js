@@ -128,9 +128,12 @@ app.get("/seekChildMergedEntries",function(reqmain,resmain){
     });
 });
 app.post("/searchForImage",function(req,res){
-    console.log(req.body);
+    var photoPath = "/photos/"+req.body;
+    console.log(__dirname);
+    console.log(process.env.pwd);
+    console.log(photoPath);
     if(req.body != ""){
-        sharp("/photos/"+req.body)
+        sharp(photoPath)
            .resize(256,256)
            .toBuffer(function(err,buffer,info){
                if(err) throw err;
