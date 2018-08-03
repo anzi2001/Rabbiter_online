@@ -16,7 +16,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "LD_PRELOAD='/opt/app-root/src/node_modules/sharp/vendor/lib/libz.so' node rabbiter_main.js"
+    "start": "node rabbiter_main.js"
   },
   "repository": {
     "type": "git",
