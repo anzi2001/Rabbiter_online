@@ -113,11 +113,11 @@ app.post("/seekParentOf",function(req,res){
                 {chooseGender:"Female"},
             ]}
         ]
-        },function(err,result){
+        }.toArray(function(err,result){
             if(err) throw err;
             console.log(result);
             res.json(result);
-        });
+        }));
 });
 
 app.get("/seekChildMergedEntries",function(reqmain,resmain){
